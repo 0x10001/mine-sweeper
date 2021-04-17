@@ -6,6 +6,12 @@ export class Board {
   #size
   #mines
 
+  static #neighbors = [
+    [-1, -1], [-1, 0], [-1, 1],
+    [0, -1], [0, 1],
+    [1, -1], [1, 0], [1, 1],
+  ]
+
   constructor() {
     this.resize(16, 30, 99)
   }
@@ -26,6 +32,10 @@ export class Board {
     this.#secret.fill(0, 0, this.#size)
   }
 
+  neighbors(r, c) {
+    return Board.#neighbors.map(([dr, dc]) => [r + dr, c + dc]).filter(([y, x]) => this.#isInBoard(y, x))
+  }
+
   get height() {
     return this.#height
   }
@@ -36,5 +46,13 @@ export class Board {
 
   get mines() {
     return this.#mines
+  }
+
+  static #isInRange(n, b) {
+    return n >= 0 && n < b
+  }
+
+  #isInBoard(r, c) {
+    return Board.#isInRange(c, this.#width) && Board.#isInRange(r, this.#height)
   }
 }
