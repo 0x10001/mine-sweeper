@@ -25,4 +25,16 @@ export class Board {
     this.#remainders = this.#size - this.#mines
     this.#secret.fill(0, 0, this.#size)
   }
+
+  get height() {
+    return this.#height
+  }
+
+  get width() {
+    return this.#width
+  }
+
+  get mines() {
+    return this.#mines
+  }
 }
