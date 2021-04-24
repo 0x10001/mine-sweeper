@@ -1,9 +1,8 @@
 import '../css/style.css'
-import { randRange } from './Random'
+import { Board } from './Board'
 
-for (let i = 0; i < 10; i++) {
-  console.log(randRange(10))
-}
+const secret = new Board()
+secret.debug()
 
 document.querySelector('#app').innerHTML = `
   <h1>Hello Vite!</h1>

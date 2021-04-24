@@ -1,4 +1,12 @@
 export class Board {
+  // for debug
+  debug() {
+    const msg = this.#board.map(row => 
+      Array.prototype.map.call(row, x => x & 0x0f).join('')
+    ).join('\n')
+    console.debug(msg)
+  }
+
   #secret = new Uint8Array(512)
   #board
   #height
