@@ -2,7 +2,7 @@ export class Board {
   // for debug
   debug() {
     const msg = this.#board.map(row => 
-      Array.prototype.map.call(row, x => x & 0x0f).join('')
+      Array.prototype.map.call(row, x => x & Board.#MASK).join('')
     ).join('\n')
     console.debug(msg)
   }
@@ -13,6 +13,18 @@ export class Board {
   #width
   #size
   #mines
+
+  static get INIT() { return 9 }
+  static get FLAG() { return 10 }
+  static get CROSS() { return 11 }
+  static get MINE() { return 12 }
+  static get EXPLODED() { return 13 }
+  static get HIDDEN() { return 14 }
+
+  static #MINE = 0x0f
+  static #UNCOVERED = 0x10
+  static #FLAGGED = 0x20
+  static #MASK = 0x0f
 
   static #neighbors = [
     [-1, -1], [-1, 0], [-1, 1],
