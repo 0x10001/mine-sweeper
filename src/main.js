@@ -2,6 +2,7 @@ import '../css/style.css'
 import { Board } from './Board'
 
 const secret = new Board()
+secret.start(5, 5)
 secret.debug()
 
 document.querySelector('#app').innerHTML = `
