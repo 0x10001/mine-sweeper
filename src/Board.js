@@ -15,6 +15,9 @@ export class Board {
   #width
   #size
   #mines
+  #unflagged
+  #remainders
+  #over
 
   static get INIT() { return 9 }
   static get FLAG() { return 10 }
