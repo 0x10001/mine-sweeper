@@ -129,4 +129,25 @@ export class Board {
       }
     }
   }
+
+  uncover(blocks) {
+    const mask = Board.#FLAGGED | Board.#UNCOVERED
+    const queue = new Set(blocks.filter(([r, c]) => !(this.#board[r][c] & mask)).map(([r, c]) => this.#pack(r, c)))
+    while (queue.size) {
+      const index = queue.keys().next().value
+      queue.delete(index)
+      const [dr, dc] = this.#unpack(index)
+      if (this.#board[dr][dc] === Board.#MINE) {
+        this.#board[dr][dc] |= Board.#UNCOVERED
+        continue
+      }
+      if (this.#board[dr][dc] === 0) {
+        for (let [y, x] of this.neighbors(dr, dc)) {
+          this.#board[y][x] & mask || queue.add(this.#pack(y, x))
+        }
+      }
+      --this.#remainders
+      this.#board[dr][dc] |= Board.#UNCOVERED
+    }
+  }
 }
