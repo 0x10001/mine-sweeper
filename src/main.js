@@ -7,7 +7,8 @@ secret.debug()
 
 globalThis.uncover = function (r, c) {
   console.clear()
-  secret.uncover(r, c)
+  const ret = secret.uncover(r, c)
+  console.debug(JSON.stringify(ret))
   secret.debug()
 }
 
