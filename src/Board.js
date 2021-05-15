@@ -1,4 +1,5 @@
-import { randRange } from "./Random"
+import { randRange } from './Random'
+import { OperationResponse } from './Response'
 
 export class Board {
   // for debug
@@ -132,6 +133,7 @@ export class Board {
 
   uncover(blocks) {
     const mask = Board.#FLAGGED | Board.#UNCOVERED
+    const ret = new OperationResponse(this)
     const queue = new Set(blocks.filter(([r, c]) => !(this.#board[r][c] & mask)).map(([r, c]) => this.#pack(r, c)))
     while (queue.size) {
       const index = queue.keys().next().value
@@ -139,6 +141,7 @@ export class Board {
       const [dr, dc] = this.#unpack(index)
       if (this.#board[dr][dc] === Board.#MINE) {
         this.#board[dr][dc] |= Board.#UNCOVERED
+        ret.affect(dr, dc, Board.EXPLODED)
         continue
       }
       if (this.#board[dr][dc] === 0) {
@@ -147,7 +150,9 @@ export class Board {
         }
       }
       --this.#remainders
+      ret.uncover(dr, dc, this.#board[dr][dc])
       this.#board[dr][dc] |= Board.#UNCOVERED
     }
+    return ret
   }
 }
