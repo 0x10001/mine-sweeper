@@ -153,6 +153,34 @@ export class Board {
       ret.uncover(dr, dc, this.#board[dr][dc])
       this.#board[dr][dc] |= Board.#UNCOVERED
     }
+
+    // game over
+    if (exploded) {
+      this.#over = true
+      const correctFlag = Board.#FLAGGED | Board.#MINE
+      for (let r = 0; r < this.#height; r++) {
+        for (let c = 0; c < this.#width; c++) {
+          if (this.#board[r][c] & Board.#UNCOVERED || this.#board[r][c] === correctFlag) {
+            continue
+          }
+          if (this.#board[r][c] === Board.#MINE) {
+            ret.affect(r, c, Board.MINE)
+          } else if (this.#board[r][c] & Board.#FLAGGED) {
+            ret.affect(r, c, Board.CROSS)
+          }
+        }
+      }
+    } else if (this.#remainders === 0) {
+      this.#over = true
+      for (let r = 0; r < this.#height; r++) {
+        for (let c = 0; c < this.#width; c++) {
+          if (this.#board[r][c] === Board.#MINE) {
+            ret.affect(r, c, Board.HIDDEN)
+          }
+        }
+      }
+    }
+
     return ret
   }
 }
