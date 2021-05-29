@@ -183,4 +183,27 @@ export class Board {
 
     return ret
   }
+  
+  toggleFlag(r, c) {
+    // already uncovered
+    if (this.#over || this.#board[r][c] & Board.#UNCOVERED) {
+      return new OperationResponse(this)
+    }
+
+    // flagged
+    if (this.#board[r][c] & Board.#FLAGGED) {
+      this.#board[r][c] &= ~Board.#FLAGGED
+      ++this.#unflagged
+      const ret = new OperationResponse(this)
+      ret.affect(r, c, Board.INIT)
+      return ret
+    }
+
+    // unhandled
+    this.#board[r][c] |= Board.#FLAGGED
+    --this.#unflagged
+    const ret = new OperationResponse(this)
+    ret.affect(r, c, Board.FLAG)
+    return ret
+  }
 }
