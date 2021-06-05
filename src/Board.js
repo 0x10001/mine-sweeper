@@ -58,32 +58,48 @@ export class Board {
     this.#secret.fill(0, 0, this.#size)
   }
 
-  #start(r, c) {
-    const neighbors = this.neighbors(r, c)
-    neighbors.push([r, c])
-
-    const mineSet = new Set(Array.from({length: this.#mines}, (_, i) => i))
-
-    for (let i = this.#size - neighbors.length; i > 1; i--) {
-      const j = randRange(i)
-      this.#swap(i - 1, j, mineSet)
-    }
-
-    let k = this.#size
-    for (const [y, x] of neighbors) {
-      this.#swap(this.#pack(y, x), --k, mineSet)
-    }
-
-    for (const idx of mineSet) {
-      const [sr, sc] = this.#unpack(idx)
-      for (const [y, x] of this.neighbors(sr, sc)) {
-        this.#board[y][x] & Board.#MASK ^ Board.#MINE && this.#board[y][x]++
-      }
-    }
-  }
-
   neighbors(r, c) {
     return Board.#neighbors.map(([dr, dc]) => [r + dr, c + dc]).filter(([y, x]) => this.#isInBoard(y, x))
+  }
+
+  toggleFlag(r, c) {
+    // already uncovered
+    if (this.#over || this.#board[r][c] & Board.#UNCOVERED) {
+      return new OperationResponse(this)
+    }
+
+    // flagged
+    if (this.#board[r][c] & Board.#FLAGGED) {
+      this.#board[r][c] &= ~Board.#FLAGGED
+      ++this.#unflagged
+      const ret = new OperationResponse(this)
+      ret.affect(r, c, Board.INIT)
+      return ret
+    }
+
+    // unhandled
+    this.#board[r][c] |= Board.#FLAGGED
+    --this.#unflagged
+    const ret = new OperationResponse(this)
+    ret.affect(r, c, Board.FLAG)
+    return ret
+  }
+
+  handle(r, c) {
+    if (this.#over || this.#board[r][c] & Board.#FLAGGED) {
+      return new OperationResponse(this)
+    }
+
+    if (this.#board[r][c] & Board.#UNCOVERED) {
+      const neighbors = this.neighbors(r, c)
+      const flags = neighbors.reduce((r, [y, x]) => r + ((this.#board[y][x] | Board.#FLAGGED) > 0), 0)
+      return flags === (this.#board[r][c] & Board.#MASK) ? this.#uncover(neighbors) : new OperationResponse(this)
+    }
+
+    if (this.#size === this.#mines + this.#remainders) {
+      this.#start(r, c)
+    }
+    return this.#uncover([[r, c]])
   }
 
   get height() {
@@ -127,6 +143,30 @@ export class Board {
       } else {
         s.delete(x)
         s.add(y)
+      }
+    }
+  }
+
+  #start(r, c) {
+    const neighbors = this.neighbors(r, c)
+    neighbors.push([r, c])
+
+    const mineSet = new Set(Array.from({length: this.#mines}, (_, i) => i))
+
+    for (let i = this.#size - neighbors.length; i > 1; i--) {
+      const j = randRange(i)
+      this.#swap(i - 1, j, mineSet)
+    }
+
+    let k = this.#size
+    for (const [y, x] of neighbors) {
+      this.#swap(this.#pack(y, x), --k, mineSet)
+    }
+
+    for (const idx of mineSet) {
+      const [sr, sc] = this.#unpack(idx)
+      for (const [y, x] of this.neighbors(sr, sc)) {
+        this.#board[y][x] & Board.#MASK ^ Board.#MINE && this.#board[y][x]++
       }
     }
   }
@@ -184,45 +224,5 @@ export class Board {
     }
 
     return ret
-  }
-
-  toggleFlag(r, c) {
-    // already uncovered
-    if (this.#over || this.#board[r][c] & Board.#UNCOVERED) {
-      return new OperationResponse(this)
-    }
-
-    // flagged
-    if (this.#board[r][c] & Board.#FLAGGED) {
-      this.#board[r][c] &= ~Board.#FLAGGED
-      ++this.#unflagged
-      const ret = new OperationResponse(this)
-      ret.affect(r, c, Board.INIT)
-      return ret
-    }
-
-    // unhandled
-    this.#board[r][c] |= Board.#FLAGGED
-    --this.#unflagged
-    const ret = new OperationResponse(this)
-    ret.affect(r, c, Board.FLAG)
-    return ret
-  }
-
-  handle(r, c) {
-    if (this.#over || this.#board[r][c] & Board.#FLAGGED) {
-      return new OperationResponse(this)
-    }
-
-    if (this.#board[r][c] & Board.#UNCOVERED) {
-      const neighbors = this.neighbors(r, c)
-      const flags = neighbors.reduce((r, [y, x]) => r + ((this.#board[y][x] | Board.#FLAGGED) > 0), 0)
-      return flags === (this.#board[r][c] & Board.#MASK) ? this.#uncover(neighbors) : new OperationResponse(this)
-    }
-
-    if (this.#size === this.#mines + this.#remainders) {
-      this.#start(r, c)
-    }
-    return this.#uncover([[r, c]])
   }
 }
