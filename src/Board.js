@@ -114,6 +114,14 @@ export class Board {
     return this.#mines
   }
 
+  get unflagged() {
+    return this.#unflagged
+  }
+
+  get remainders() {
+    return this.#remainders
+  }
+
   static #isInRange(n, b) {
     return n >= 0 && n < b
   }
