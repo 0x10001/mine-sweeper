@@ -58,7 +58,7 @@ export class Board {
     this.#secret.fill(0, 0, this.#size)
   }
 
-  start(r, c) {
+  #start(r, c) {
     const neighbors = this.neighbors(r, c)
     neighbors.push([r, c])
 
@@ -131,15 +131,17 @@ export class Board {
     }
   }
 
-  uncover(blocks) {
+  #uncover(blocks) {
     const mask = Board.#FLAGGED | Board.#UNCOVERED
     const ret = new OperationResponse(this)
     const queue = new Set(blocks.filter(([r, c]) => !(this.#board[r][c] & mask)).map(([r, c]) => this.#pack(r, c)))
+    let exploded = false
     while (queue.size) {
       const index = queue.keys().next().value
       queue.delete(index)
       const [dr, dc] = this.#unpack(index)
       if (this.#board[dr][dc] === Board.#MINE) {
+        exploded = true
         this.#board[dr][dc] |= Board.#UNCOVERED
         ret.affect(dr, dc, Board.EXPLODED)
         continue
@@ -183,7 +185,7 @@ export class Board {
 
     return ret
   }
-  
+
   toggleFlag(r, c) {
     // already uncovered
     if (this.#over || this.#board[r][c] & Board.#UNCOVERED) {
@@ -205,5 +207,22 @@ export class Board {
     const ret = new OperationResponse(this)
     ret.affect(r, c, Board.FLAG)
     return ret
+  }
+
+  handle(r, c) {
+    if (this.#over || this.#board[r][c] & Board.#FLAGGED) {
+      return new OperationResponse(this)
+    }
+
+    if (this.#board[r][c] & Board.#UNCOVERED) {
+      const neighbors = this.neighbors(r, c)
+      const flags = neighbors.reduce((r, [y, x]) => r + ((this.#board[y][x] | Board.#FLAGGED) > 0), 0)
+      return flags === (this.#board[r][c] & Board.#MASK) ? this.#uncover(neighbors) : new OperationResponse(this)
+    }
+
+    if (this.#size === this.#mines + this.#remainders) {
+      this.#start(r, c)
+    }
+    return this.#uncover([[r, c]])
   }
 }
