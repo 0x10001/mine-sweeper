@@ -5,7 +5,7 @@ export class Board {
   // for debug
   debug() {
     const msg = this.#board.map(row => 
-      Array.prototype.map.call(row, x => x & Board.#MASK).join('')
+      Array.prototype.map.call(row, x => x & Board.#MASK).map(x => x === 0 ? ' ' : x === Board.#MINE ? '.' : x).join('')
     ).join('\n')
     console.debug(msg)
   }
