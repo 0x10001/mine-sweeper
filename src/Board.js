@@ -140,35 +140,22 @@ export class Board {
     return [r, c]
   }
 
-  #swap(x, y, s) {
-    if ((this.#secret[x] ^ this.#secret[y]) & Board.#MASK) {
-      this.#secret[x] ^= this.#secret[y] & Board.#MASK
-      this.#secret[y] ^= this.#secret[x] & Board.#MASK
-      this.#secret[x] ^= this.#secret[y] & Board.#MASK
-      if (this.#secret[x] & Board.#MASK) {
-        s.delete(y)
-        s.add(x)
-      } else {
-        s.delete(x)
-        s.add(y)
-      }
-    }
-  }
-
   #start(r, c) {
-    const neighbors = this.neighbors(r, c)
-    neighbors.push([r, c])
+    const neighbors = new Set(this.neighbors(r, c).map(([y, x]) => this.#pack(y, x)))
+    neighbors.add(this.#pack(r, c))
 
-    const mineSet = new Set(Array.from({length: this.#mines}, (_, i) => i))
+    const pool = Uint16Array.from({length: this.#size}, (_, i) => i)
+    const mineSet = new Set()
 
-    for (let i = this.#size - neighbors.length; i > 1; i--) {
+    for (let i = this.#size; mineSet.size < this.#mines; i--) {
       const j = randRange(i)
-      this.#swap(i - 1, j, mineSet)
-    }
-
-    let k = this.#size
-    for (const [y, x] of neighbors) {
-      this.#swap(this.#pack(y, x), --k, mineSet)
+      const t = pool[j]
+      pool[j] = pool[i - 1]
+      if (neighbors.has(t)) {
+        continue
+      }
+      mineSet.add(t)
+      this.#secret[t] |= Board.#MINE
     }
 
     for (const idx of mineSet) {
