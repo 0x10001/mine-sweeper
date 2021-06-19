@@ -1,4 +1,5 @@
 import '../css/style.css'
+import './Drawing'
 import { Board } from './Board'
 
 const secret = new Board()
