@@ -141,17 +141,19 @@ export class Board {
   }
 
   #start(r, c) {
-    const neighbors = new Set(this.neighbors(r, c).map(([y, x]) => this.#pack(y, x)))
-    neighbors.add(this.#pack(r, c))
+    const pool = Int16Array.from({length: this.#size}, (_, i) => i)
+    pool[this.#pack(r, c)] = -1
+    for (const [y, x] of this.neighbors(r, c)) {
+      pool[this.#pack(y, x)] = -1
+    }
 
-    const pool = Uint16Array.from({length: this.#size}, (_, i) => i)
     const mineSet = new Set()
 
     for (let i = this.#size; mineSet.size < this.#mines; i--) {
       const j = randRange(i)
       const t = pool[j]
       pool[j] = pool[i - 1]
-      if (neighbors.has(t)) {
+      if (t < 0) {
         continue
       }
       mineSet.add(t)
