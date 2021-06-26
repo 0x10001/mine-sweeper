@@ -12,7 +12,7 @@ function showBoard() {
     (Array.prototype.map.call(row, x => 
       x === Board.INIT ? '?' :
       x === Board.FLAG ? '!' :
-      x === Board.EXPLODED ? ':' :
+      x === Board.TRIGGERED ? '*' :
       x === Board.MINE ? '.' :
       x === Board.CROSS ? 'X' :
       x === Board.HIDDEN ? '@' :
@@ -50,6 +50,10 @@ globalThis.toggleFlag = function (r, c) {
 globalThis.restart = function () {
   buf.fill(Board.INIT)
   secret.reset()
+}
+
+globalThis.cheat = function () {
+  secret.debug()
 }
 
 globalThis.restart()

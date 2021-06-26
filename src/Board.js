@@ -24,7 +24,7 @@ export class Board {
   static get FLAG() { return 10 }
   static get CROSS() { return 11 }
   static get MINE() { return 12 }
-  static get EXPLODED() { return 13 }
+  static get TRIGGERED() { return 13 }
   static get HIDDEN() { return 14 }
 
   static #MINE = 0x0f
@@ -180,7 +180,7 @@ export class Board {
       if (this.#board[dr][dc] === Board.#MINE) {
         exploded = true
         this.#board[dr][dc] |= Board.#UNCOVERED
-        ret.affect(dr, dc, Board.EXPLODED)
+        ret.affect(dr, dc, Board.TRIGGERED)
         continue
       }
       if (this.#board[dr][dc] === 0) {
