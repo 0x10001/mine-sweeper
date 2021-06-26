@@ -5,8 +5,6 @@ import { Board } from './Board'
 const secret = new Board()
 
 const buf = new Uint8Array(512)
-buf.fill(Board.INIT)
-
 const board = Array.from({length: secret.height}, (_, i) => buf.subarray(i * secret.width, (i + 1) * secret.width))
 
 function showBoard() {
@@ -48,3 +46,10 @@ globalThis.toggleFlag = function (r, c) {
   console.debug(ret.unflagged, ret.remainders)
   showBoard()
 }
+
+globalThis.restart = function () {
+  buf.fill(Board.INIT)
+  secret.reset()
+}
+
+globalThis.restart()
